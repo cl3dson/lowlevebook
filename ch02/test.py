@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 import re
 import sys
 from subprocess import CalledProcessError, Popen, PIPE
@@ -148,7 +149,7 @@ tests=[ Test('string_length',
              lambda v : """section .data
         str: db '""" + v + """', 0
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start
         _start:
         """ + before_call + """
@@ -165,7 +166,7 @@ tests=[ Test('string_length',
              lambda v : """section .data
         str: db '""" + v + """', 0
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -178,32 +179,9 @@ tests=[ Test('string_length',
         syscall""", 
         lambda i,o,r: i == o),
 
-        Test('string_copy',
-            lambda v: """
-        section .data
-        arg1: db '""" + v + """', 0
-        arg2: times """ + str(len(v) + 1) +  """ db  66
-        section .text
-        %include "lib.inc"
-        global _start 
-        _start:
-        """ + before_call + """
-        mov rdi, arg1
-        mov rsi, arg2
-        mov rdx, """ + str(len(v) + 1) + """
-        call string_copy
-
-        """ + after_call + """
-        mov rdi, arg2 
-        call print_string
-        mov rax, 60
-        xor rdi, rdi
-        syscall""", 
-        lambda i,o,r: i == o),
-
         Test('print_char',
             lambda v:""" section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -215,9 +193,9 @@ tests=[ Test('string_length',
         syscall""", 
         lambda i,o,r: i == o),
 
-        Test('print_uint',
+       Test('print_uint',
             lambda v: """section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -231,7 +209,7 @@ tests=[ Test('string_length',
         
         Test('print_int',
             lambda v: """section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -245,7 +223,7 @@ tests=[ Test('string_length',
 
         Test('read_char',
              lambda v:"""section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -261,7 +239,7 @@ tests=[ Test('string_length',
         section .data
         word_buf: times 20 db 0xca
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -282,7 +260,7 @@ tests=[ Test('string_length',
         section .data
         word_buf: times 20 db 0xca
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -301,7 +279,7 @@ tests=[ Test('string_length',
         section .data
         word_buf: times 20 db 0xca
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -319,7 +297,7 @@ tests=[ Test('string_length',
              lambda v: """section .data
         input: db '""" + v  + """', 0
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -338,7 +316,7 @@ tests=[ Test('string_length',
              lambda v: """section .data
         input: db '""" + v  + """', 0
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
@@ -358,7 +336,7 @@ tests=[ Test('string_length',
              str1: db '""" + v + """',0
              str2: db '""" + v + """',0
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start
         _start:
         """ + before_call + """
@@ -376,7 +354,7 @@ tests=[ Test('string_length',
              str1: db '""" + v + """',0
              str2: db '""" + v + """!!',0
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start
         _start:
         """ + before_call + """
@@ -389,6 +367,31 @@ tests=[ Test('string_length',
         syscall""",
         lambda i,o,r: r == 0),
 
+        Test('string_copy',
+            lambda v: """
+        section .data
+        arg1: db '""" + v + """', 0
+        arg2: times """ + str(len(v) + 1) +  """ db  66
+        section .text
+        %include "lib.asm"
+        global _start 
+        _start:
+        """ + before_call + """
+        mov rdi, arg1
+        mov rsi, arg2
+        mov rdx, """ + str(len(v) + 1) + """
+        call string_copy
+
+        """ + after_call + """
+        mov rdi, arg2 
+        call print_string
+        mov rax, 60
+        xor rdi, rdi
+        syscall""", 
+        lambda i,o,r: i == o),
+
+
+ 
         Test('string_copy_too_long',
             lambda v: """
             section .rodata
@@ -397,7 +400,7 @@ tests=[ Test('string_length',
         arg1: db '""" + v + """', 0
         arg2: times """ + str(len(v)/2)  +  """ db  66
         section .text
-        %include "lib.inc"
+        %include "lib.asm"
         global _start 
         _start:
         """ + before_call + """
